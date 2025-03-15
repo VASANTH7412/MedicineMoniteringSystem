@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% load widget_tweaks %}
+
+{% block title %} Inventory List {% endblock title %}
+
+{% block content %}
+    <div class="row" style="color: hsl(0, 0%, 31%); font-weight: bold; font-size: 3rem;">
+        <div class="col-md-8">STOCK LISTS</div>
+        <div class="col-md-4 text-end">               
+            <a class="btn btn-success" href="{% url 'new-stock' %}">Add New Stock</a>
+        </div>
+    </div>
+
+    <hr>
+
+    <!-- Alert Messages -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <form method="get">
+        <div class="input-group search">
+            {% render_field filter.form.name class="form-control textinput" placeholder="Search by stock name" %}
+            <button type="submit" class="btn btn-pink">Search</button>
+        </div>
+    </form>
+
+    <br>
+
+    <table class="table table-css table-bordered table-hover">
+        <thead class="thead-dark align-middle">
+            <tr>
+                <th width="40%">Stock Name</th>
+                <th>Current Stock</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+
+        {% if object_list %}
+            <tbody>
+                {% for stock in object_list %}
+                    <tr>
+                        <td>{{ stock.name }}</td>
+                        <td class="align-middle {% if stock.quantity <= 10 %} text-danger fw-bold {% endif %}">
+                            {{ stock.quantity }}
+                        </td>
+                        <td class="align-middle">
+                            <a href="{% url 'edit-stock' stock.pk %}" class="btn btn-info btn-sm">Edit</a>
+                            <a href="{% url 'delete-stock' stock.pk %}" class="btn btn-danger btn-sm">Delete</a>
+                        </td>          
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>  
+
+        <div class="pagination">
+            {% if is_paginated %}
+                {% if page_obj.has_previous %}
+                    <a class="btn btn-outline-info mb-4" href="?page=1">First</a>
+                    <a class="btn btn-outline-info mb-4" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+                {% endif %}
+
+                {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                        <a class="btn btn-info mb-4" href="?page={{ num }}">{{ num }}</a>
+                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                        <a class="btn btn-outline-info mb-4" href="?page={{ num }}">{{ num }}</a>
+                    {% endif %}
+                {% endfor %}
+
+                {% if page_obj.has_next %}
+                    <a class="btn btn-outline-info mb-4" href="?page={{ page_obj.next_page_number }}">Next</a>
+                    <a class="btn btn-outline-info mb-4" href="?page={{ page_obj.paginator.num_pages }}">Last</a>
+                {% endif %}
+            {% endif %}
+        </div>
+    {% else %}
+        <tbody></tbody>
+        </table>
+        <br><br><br>
+        <div class="text-center" style="color: #575757; font-size: 1.5rem; font-weight: bold;">
+            No records found. Try adding some stock.
+        </div>
+    {% endif %}
+
+{% endblock content %}
